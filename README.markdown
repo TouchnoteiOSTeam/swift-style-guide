@@ -66,12 +66,13 @@ Descriptive and consistent naming makes software easier to read and understand. 
 - striving for clarity at the call site
 - prioritizing clarity over brevity
 - using camel case (not snake case)
+- using snake case for string literals (e.g. keys in strings file).  This allows double-clicking to select the whole key.
 - using uppercase for types (and protocols), lowercase for everything else
 - including all needed words while omitting needless words
 - using names based on roles, not types
 - sometimes compensating for weak type information
 - striving for fluent usage
-- beginning factory methods with `make`
+- beginning factory methods with `create`
 - naming methods for their side effects
   - verb methods follow the -ed, -ing rule for the non-mutating version
   - noun methods follow the formX rule for the mutating version
@@ -287,14 +288,15 @@ var deviceModels: [String]
 
 ![Xcode indent settings](screens/indentation.png)
 
-* Method braces and other braces (`if`/`else`/`switch`/`while` etc.) always open on the same line as the statement but close on a new line.
+* Method braces and other braces (`if`/`else`/`switch`/`while` etc.) always open on a new line as the statement.
 * Tip: You can re-indent by selecting some code (or **Command-A** to select all) and then **Control-I** (or **Editor ▸ Structure ▸ Re-Indent** in the menu). Some of the Xcode template code will have 4-space tabs hard coded, so this is a good way to fix that.
 
 **Preferred**:
 ```swift
 if user.isHappy {
   // Do something
-} else {
+} 
+else {
   // Do something else
 }
 ```
@@ -399,7 +401,7 @@ extension Circle: CustomStringConvertible {
 The example above demonstrates the following style guidelines:
 
  + Specify types for properties, variables, constants, argument declarations and other statements with a space after the colon but not before, e.g. `x: Int`, and `Circle: Shape`.
- + Define multiple variables and structures on a single line if they share a common purpose / context.
+ + Define multiple variables and structures on a single line if they share a common purpose / context and the variable names themselves are single letters or otherwise short & similar - e.g. `width`, `height` are ok, but not `shouldDoThingWithOtherThing` and `didSeeAlertForDoingThing`.
  + Indent getter and setter definitions and property observers.
  + Don't add modifiers such as `internal` when they're already the default. Similarly, don't repeat the access modifier when overriding a method.
  + Organize extra functionality (e.g. printing) in extensions.
@@ -409,7 +411,7 @@ The example above demonstrates the following style guidelines:
 
 For conciseness, avoid using `self` since Swift does not require it to access an object's properties or invoke its methods.
 
-Use self only when required by the compiler (in `@escaping` closures, or in initializers to disambiguate properties from arguments). In other words, if it compiles without `self` then omit it.
+Use self only when required by the compiler (in `@escaping` closures, or in initializers to disambiguate properties from arguments), or if writing `self` provides clarity where it may take a moment to spot that a var/let is not local.
 
 
 ### Computed Properties
@@ -434,7 +436,7 @@ var diameter: Double {
 
 ### Final
 
-Marking classes or members as `final` in tutorials can distract from the main topic and is not required. Nevertheless, use of `final` can sometimes clarify your intent and is worth the cost. In the below example, `Box` has a particular purpose and customization in a derived class is not intended. Marking it `final` makes that clear.
+Use final only when you feel your class is not suitable for subclassing rather than by default.
 
 ```swift
 // Turn any generic type into a reference type using this Box class.
@@ -456,13 +458,12 @@ func reticulateSplines(spline: [Double]) -> Bool {
 }
 ```
 
-For functions with long signatures, put each parameter on a new line and add an extra indent on subsequent lines:
+For functions with long signatures, put each parameter except the first, on a new line and add an extra indent on subsequent lines:
 
 ```swift
-func reticulateSplines(
-  spline: [Double], 
-  adjustmentFactor: Double,
-  translateConstant: Int, comment: String
+func reticulateSplines(spline: [Double], 
+                       adjustmentFactor: Double,
+                       translateConstant: Int, comment: String
 ) -> Bool {
   // reticulate code goes here
 }
@@ -498,14 +499,13 @@ Mirror the style of function declarations at call sites. Calls that fit on a sin
 let success = reticulateSplines(splines)
 ```
 
-If the call site must be wrapped, put each parameter on a new line, indented one additional level:
+If the call site must be wrapped, put each parameter except the first on a new line, indented one additional level:
 
 ```swift
-let success = reticulateSplines(
-  spline: splines,
-  adjustmentFactor: 1.3,
-  translateConstant: 2,
-  comment: "normalize the display")
+let success = reticulateSplines(spline: splines,
+                                adjustmentFactor: 1.3,
+                                translateConstant: 2,
+                                comment: "normalize the display")
 ```
 
 ## Closure Expressions
@@ -546,15 +546,12 @@ attendeeList.sort { a, b in
 }
 ```
 
-Chained methods using trailing closures should be clear and easy to read in context. Decisions on spacing, line breaks, and when to use named versus anonymous arguments is left to the discretion of the author. Examples:
+Chained methods using trailing closures should be clear and easy to read in context. Chaining methods should be placed on new lines to make it possible to breakpoint and see which one has failed.. Examples:
 
 ```swift
-let value = numbers.map { $0 * 2 }.filter { $0 % 3 == 0 }.index(of: 90)
-
-let value = numbers
-  .map {$0 * 2}
-  .filter {$0 > 50}
-  .map {$0 + 10}
+let value = numbers.map { $0 * 2 }
+                   .filter { $0 % 3 == 0 }
+                   .index(of: 90)
 ```
 
 ## Types
@@ -591,7 +588,7 @@ You can define constants on a type rather than on an instance of that type using
 
 **Preferred**:
 ```swift
-enum Math {
+struct Math {
   static let e = 2.718281828459045235360287
   static let root2 = 1.41421356237309504880168872
 }
@@ -599,7 +596,6 @@ enum Math {
 let hypotenuse = side * Math.root2
 
 ```
-**Note:** The advantage of using a case-less enumeration is that it can't accidentally be instantiated and works as a pure namespace.
 
 **Not Preferred**:
 ```swift
@@ -674,18 +670,16 @@ UIView.animate(withDuration: 2.0) { [weak self] in
 
 ### Lazy Initialization
 
-Consider using lazy initialization for finer grained control over object lifetime. This is especially true for `UIViewController` that loads views lazily. You can either use a closure that is immediately called `{ }()` or call a private factory method. Example:
+Consider using lazy initialization for finer grained control over object lifetime. This is especially true for `UIViewController` that loads views lazily. You should use a closure that is immediately called `{ }()` Example:
 
 ```swift
-lazy var locationManager = makeLocationManager()
-
-private func makeLocationManager() -> CLLocationManager {
-  let manager = CLLocationManager()
-  manager.desiredAccuracy = kCLLocationAccuracyBest
-  manager.delegate = self
-  manager.requestAlwaysAuthorization()
-  return manager
-}
+lazy var locationManager = {
+   let manager = CLLocationManager()
+   manager.desiredAccuracy = kCLLocationAccuracyBest
+   manager.delegate = self
+   manager.requestAlwaysAuthorization()
+   return manager
+}()
 ```
 
 **Notes:**
@@ -714,22 +708,21 @@ var names = [String]()
 
 #### Type Annotation for Empty Arrays and Dictionaries
 
-For empty arrays and dictionaries, use type annotation. (For an array or dictionary assigned to a large, multi-line literal, use type annotation.)
+For empty arrays and dictionaries, do not use type annotation.
 
 **Preferred**:
-```swift
-var names: [String] = []
-var lookup: [String: Int] = [:]
-```
-
-**Not Preferred**:
 ```swift
 var names = [String]()
 var lookup = [String: Int]()
 ```
 
-**NOTE**: Following this guideline means picking descriptive names is even more important than before.
+**Not Preferred**:
+```swift
+var names: [String] = []
+var lookup: [String: Int] = [:]
+```
 
+**NOTE**: Following this guideline means picking descriptive names is even more important than before.
 
 ### Syntactic Sugar
 
@@ -899,6 +892,7 @@ result = a > b ? x = c > d ? c : d : y
 ## Golden Path
 
 When coding with conditionals, the left-hand margin of the code should be the "golden" or "happy" path. That is, don't nest `if` statements. Multiple return statements are OK. The `guard` statement is built for this.
+Do not use the `guard` statement when choosing between two valid code paths.  The `guard` statement should indicate that a requirement has not been met or a dependency is not available.
 
 **Preferred**:
 ```swift
@@ -1049,9 +1043,9 @@ let message = "You cannot charge the flux " +
   "have \(credits) credits available."
 ```
 
-## No Emoji
+## Emoji in Comments
 
-Do not use emoji in your projects. For those readers who actually type in their code, it's an unnecessary source of friction. While it may be cute, it doesn't add to the learning and it interrupts the coding flow for these readers.
+Emoji may be used in comments, but should not be used in actual code.
 
 ## Organization and Bundle Identifier
 
@@ -1059,57 +1053,8 @@ Where an Xcode project is involved, the organization should be set to `Ray Wende
 
 ![Xcode Project settings](screens/project_settings.png)
 
-## Copyright Statement
-
-The following copyright statement should be included at the top of every source
-file:
-
-```swift
-/// Copyright (c) 2018 Razeware LLC
-/// 
-/// Permission is hereby granted, free of charge, to any person obtaining a copy
-/// of this software and associated documentation files (the "Software"), to deal
-/// in the Software without restriction, including without limitation the rights
-/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the Software is
-/// furnished to do so, subject to the following conditions:
-/// 
-/// The above copyright notice and this permission notice shall be included in
-/// all copies or substantial portions of the Software.
-/// 
-/// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
-/// distribute, sublicense, create a derivative work, and/or sell copies of the
-/// Software in any work that is designed, intended, or marketed for pedagogical or
-/// instructional purposes related to programming, coding, application development,
-/// or information technology.  Permission for such use, copying, modification,
-/// merger, publication, distribution, sublicensing, creation of derivative works,
-/// or sale is expressly withheld.
-/// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-/// THE SOFTWARE.
-```
-
-## Smiley Face
-
-Smiley faces are a very prominent style feature of the [raywenderlich.com](https://www.raywenderlich.com/) site! It is very important to have the correct smile signifying the immense amount of happiness and excitement for the coding topic. The closing square bracket `]` is used because it represents the largest smile able to be captured using ASCII art. A closing parenthesis `)` creates a half-hearted smile, and thus is not preferred.
-
-**Preferred**:
-```
-:]
-```
-
-**Not Preferred**:
-```
-:)
-```  
-
 ## References
-
+* [Ray Wenderlich Swift style guide] (https://github.com/raywenderlich/swift-style-guide)
 * [The Swift API Design Guidelines](https://swift.org/documentation/api-design-guidelines/)
 * [The Swift Programming Language](https://developer.apple.com/library/prerelease/ios/documentation/swift/conceptual/swift_programming_language/index.html)
 * [Using Swift with Cocoa and Objective-C](https://developer.apple.com/library/prerelease/ios/documentation/Swift/Conceptual/BuildingCocoaApps/index.html)
