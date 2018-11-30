@@ -1045,12 +1045,6 @@ let message = "You cannot charge the flux " +
 
 Emoji may be used in comments, but should not be used in actual code.
 
-## Organization and Bundle Identifier
-
-Where an Xcode project is involved, the organization should be set to `Ray Wenderlich` and the Bundle Identifier set to `com.razeware.TutorialName` where `TutorialName` is the name of the tutorial project.
-
-![Xcode Project settings](screens/project_settings.png)
-
 ## References
 * [Ray Wenderlich Swift style guide] (https://github.com/raywenderlich/swift-style-guide)
 * [The Swift API Design Guidelines](https://swift.org/documentation/api-design-guidelines/)
