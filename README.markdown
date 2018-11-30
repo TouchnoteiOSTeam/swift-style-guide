@@ -1,4 +1,4 @@
-# Touchnote Swift Style Guide.
+# TouchNote Swift Style Guide.
 ### Forked from `The Official raywenderlich.com Swift Style Guide.`
 ### Updated for Swift 4.2
 
